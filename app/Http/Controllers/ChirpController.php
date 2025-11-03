@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 
 class ChirpController extends Controller
 {
+
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
@@ -15,7 +18,7 @@ class ChirpController extends Controller
     {
         $chirps =  Chirp::with('user')
             ->latest()
-            ->take(50)//limit to 50 mos recent chirps
+            ->take(50) //limit to 50 mos recent chirps
             ->get();
 
         return view('home', ['chirps' => $chirps]);
@@ -41,12 +44,9 @@ class ChirpController extends Controller
         ]);
 
         //Create the chirp
-        Chirp::create([
-            'message' => $validated['message'],
-        ]);
+        auth()->user()->chirps()->create($validated);
 
-         return redirect('/')->with('success', 'Your Twi... CHIRP! has been posted!');
-
+        return redirect('/')->with('success', 'Your Twi... CHIRP! has been posted!');
     }
 
     /**
@@ -62,8 +62,9 @@ class ChirpController extends Controller
      */
     public function edit(Chirp $chirp)
     {
+        $this->authorize('update', $chirp);
         //Retrun the view and sending the chirp model ROUTE MODEL BINDING
-        return view('chirps.edit' , compact('chirp'));
+        return view('chirps.edit', compact('chirp'));
     }
 
     /**
@@ -71,9 +72,9 @@ class ChirpController extends Controller
      */
     public function update(Request $request, Chirp $chirp)
     {
-        //Validate the reques
+        $this->authorize('update', $chirp);
 
-        
+        //Validate the reques
         $validated = $request->validate([
             'message' => "required|string|max:255"
         ]);
@@ -81,7 +82,7 @@ class ChirpController extends Controller
         //Update the chirp
         $chirp->update($validated);
 
-         return redirect('/')->with('success', 'Your Chirp has been updated!'); 
+        return redirect('/')->with('success', 'Your Chirp has been updated!');
     }
 
     /**
@@ -89,10 +90,11 @@ class ChirpController extends Controller
      */
     public function destroy(Chirp $chirp)
     {
+        $this->authorize('update', $chirp);
         //Delete the chirp
 
         $chirp->delete();
 
-             return redirect('/')->with('success', 'Your Chirp has been deleted!');
+        return redirect('/')->with('success', 'Your Chirp has been deleted!');
     }
 }
