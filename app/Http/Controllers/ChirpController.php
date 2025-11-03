@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
-use App\Models\Chirps;
 use Illuminate\Http\Request;
 
 
@@ -35,7 +34,19 @@ class ChirpController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //Validate the request
+
+        $validated = $request->validate([
+            'message' => "required|string|max:255"
+        ]);
+
+        //Create the chirp
+        Chirp::create([
+            'message' => $validated['message'],
+        ]);
+
+         return redirect('/')->with('success', 'Your Twi... CHIRP! has been posted!');
+
     }
 
     /**
@@ -49,24 +60,39 @@ class ChirpController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Chirp $chirp)
     {
-        //
+        //Retrun the view and sending the chirp model ROUTE MODEL BINDING
+        return view('chirps.edit' , compact('chirp'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Chirp $chirp)
     {
-        //
+        //Validate the reques
+
+        
+        $validated = $request->validate([
+            'message' => "required|string|max:255"
+        ]);
+
+        //Update the chirp
+        $chirp->update($validated);
+
+         return redirect('/')->with('success', 'Your Chirp has been updated!'); 
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Chirp $chirp)
     {
-        //
+        //Delete the chirp
+
+        $chirp->delete();
+
+             return redirect('/')->with('success', 'Your Chirp has been deleted!');
     }
 }
